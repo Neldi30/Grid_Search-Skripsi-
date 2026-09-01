@@ -1,8 +1,7 @@
 # Grid Search α, β, γ — T_dynamic Drowsiness Detection
 
 Pipeline Python untuk mencari nilai optimal parameter `α, β, γ` di rumus
-`T_dynamic = T_BASE − (α·|yaw| + β·|pitch| + γ·|roll|)` yang dipakai di
-MainActivity.kt:495 dan TestingActivity.kt:585.
+`T_dynamic = T_Calibrated − (α·|yaw| + β·|pitch| + γ·|roll|)` yang dipakai.
 
 ## Workflow
 
@@ -27,8 +26,8 @@ Butuh Python 3.9+ dan webcam berfungsi.
 ## 1. Perekaman Data
 
 ```powershell
-python record_data.py --subject taufik_01            # simpan CSV + video MP4 (default)
-python record_data.py --subject taufik_01 --no-video # CSV saja, tanpa video
+python record_data.py --subject # simpan CSV + video MP4 (default)
+python record_data.py --subject  --no-video # CSV saja, tanpa video
 ```
 
 **Output**:
@@ -79,8 +78,7 @@ python grid_search.py --no-fine          # coarse only
 ```
 
 Output di folder `results/<timestamp>/` (run lama tidak ter-overwrite):
-- `thesis_report.txt` — laporan lengkap untuk skripsi
-- `tabel_3_5.csv` — top-4 (siap-tempel Tabel 3.5)
+- `tabel_3_5.csv` — top-4 (Tabel)
 - `top10.csv` — top-10 detail
 - `all_combinations.csv` — semua hasil
 - `sensitivity_alpha.csv` / `_beta.csv` / `_gamma.csv` — variasi 1-param
@@ -131,35 +129,4 @@ private val GAMMA   = 0.0005
 ```
 
 Lalu rebuild app & jalankan TestingActivity untuk validasi akhir
-(masukkan ke Tabel 3.7 / 3.8 skripsi).
 
-## Struktur Folder
-
-```
-grid_search/
-├── record_data.py        # script perekaman (webcam + instruksi visual)
-├── grid_search.py        # script utama: cari best α,β,γ
-├── validate.py           # validasi nilai pilihan
-├── requirements.txt
-├── README.md
-├── recordings/           # output record_data.py
-│   ├── taufik_01.csv    # data per frame (untuk grid search)
-│   ├── taufik_01.mp4    # video raw webcam (backup/verifikasi)
-│   └── ...
-└── results/              # output grid_search.py
-    ├── thesis_report.txt
-    ├── tabel_3_5.csv
-    └── ...
-```
-
-## Catatan untuk Skripsi
-
-- **Justifikasi metodologi**: grid search dilakukan offline di laptop untuk
-  reproducibility & iterasi cepat. Hasil divalidasi di kamera HP via
-  TestingActivity (Tabel 3.7 dan 3.8).
-- **Mengapa coarse + fine**: coarse search menemukan area umum, fine search
-  refine secara lokal — menghindari sampling terlalu jarang di area optimal.
-- **Sensitivity analysis**: menjelaskan kontribusi tiap parameter — sesuai
-  hipotesis bahwa α (yaw) paling berpengaruh, γ (roll) paling kecil.
-- **T_dyn floor 0.10**: konstrain agar threshold tidak negatif/terlalu rendah
-  saat kombinasi α,β,γ tinggi di pose ekstrem.
